@@ -1,0 +1,14 @@
+{
+  "name": "小六壬占卜筆記",
+  "short_name": "小六壬",
+  "description": "小六壬依時起卦，附占卜筆記與事後驗證功能",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0e1a0e",
+  "theme_color": "#1a2e1a",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

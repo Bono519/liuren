@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a2e1a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="小六壬" />
+  <title>小六壬占卜</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <div class="header-inner">
+        <div class="logo-area">
+          <span class="logo-glyph">☯</span>
+          <div>
+            <h1>小六壬</h1>
+            <p class="subtitle">依時起卦・問事解惑</p>
+          </div>
+        </div>
+        <nav class="tab-nav">
+          <button class="tab-btn active" data-tab="divination">起卦</button>
+          <button class="tab-btn" data-tab="notes">筆記</button>
+          <button class="tab-btn" data-tab="guide">宮位</button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Tab: 起卦 -->
+    <main id="tab-divination" class="tab-panel active">
+      <section class="divination-form card">
+        <h2 class="section-title">起卦設定</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>占卜時間</label>
+            <input type="datetime-local" id="divTime" />
+            <button class="btn-ghost" id="btnNow">用現在時間</button>
+          </div>
+          <div class="form-group">
+            <label>占問事項（選填）</label>
+            <input type="text" id="divQuestion" placeholder="例：此事能否成？" maxlength="50" />
+          </div>
+        </div>
+        <button class="btn-primary" id="btnDivine">🔮 起卦</button>
+      </section>
+
+      <!-- Result -->
+      <section class="result-area card" id="resultArea" style="display:none">
+        <h2 class="section-title">卦象結果</h2>
+        <div class="hexagram-display">
+          <div class="palace-wheel" id="palaceWheel">
+            <!-- 六宮輪盤 by JS -->
+          </div>
+          <div class="result-main">
+            <div class="gua-name" id="guaName">—</div>
+            <div class="gua-stars" id="guaStars">—</div>
+            <div class="gua-nature" id="guaNature"></div>
+          </div>
+        </div>
+        <div class="calc-detail" id="calcDetail"></div>
+        <div class="interpretation card-inner" id="interpretation"></div>
+        <div class="save-row">
+          <input type="text" id="saveNote" placeholder="加上備注（可留空）" maxlength="80" />
+          <button class="btn-primary" id="btnSave">📝 存入筆記</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Tab: 筆記 -->
+    <main id="tab-notes" class="tab-panel">
+      <section class="card">
+        <div class="notes-header">
+          <h2 class="section-title">占卜筆記</h2>
+          <div class="notes-actions">
+            <select id="filterVerify">
+              <option value="">全部</option>
+              <option value="pending">待驗證</option>
+              <option value="accurate">準確</option>
+              <option value="inaccurate">不準</option>
+              <option value="partial">部分準</option>
+            </select>
+            <button class="btn-ghost danger" id="btnClearAll">清除全部</button>
+          </div>
+        </div>
+        <div id="notesList" class="notes-list">
+          <p class="empty-hint">尚無筆記，起卦後可存入</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Tab: 宮位說明 -->
+    <main id="tab-guide" class="tab-panel">
+      <section class="card">
+        <h2 class="section-title">小六壬六宮速查</h2>
+        <div class="guide-grid" id="guideGrid"></div>
+        <div class="method-box card-inner">
+          <h3>起卦方法</h3>
+          <ol>
+            <li>取農曆月份數（1–12）定<strong>月宮</strong>，從大安起算</li>
+            <li>加農曆日期數，逢六進一，得<strong>日宮</strong></li>
+            <li>加時辰數（子=1, 丑=2…亥=12），逢六進一，得<strong>時宮</strong>（主卦）</li>
+            <li>主卦即時宮所在六宮</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal for note detail -->
+  <div class="modal-overlay" id="modalOverlay" style="display:none">
+    <div class="modal card">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
