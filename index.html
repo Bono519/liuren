@@ -75,17 +75,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--red)}
 .interp-row{display:flex;gap:10px;margin-bottom:8px;font-size:.85rem;line-height:1.65}
 .i-label{color:var(--ink3);white-space:nowrap;min-width:44px;font-size:.76rem;padding-top:1px}
 .i-text{color:var(--ink)}
-.ai-block{margin-top:0}
-.ai-block h3{font-size:.88rem;color:var(--red);margin-bottom:10px;font-weight:400;letter-spacing:.08em}
-.ai-loading{display:flex;align-items:center;gap:8px;color:var(--ink3);font-size:.85rem;padding:8px 0}
-.ai-loading span{display:inline-block;animation:blink 1.2s infinite}
-.ai-loading span:nth-child(2){animation-delay:.2s}
-.ai-loading span:nth-child(3){animation-delay:.4s}
-@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-.ai-text{font-size:.88rem;line-height:1.9;color:var(--ink);white-space:pre-wrap}
-.btn-ai{background:linear-gradient(135deg,#6a1a1a,var(--red));border:none;border-radius:var(--radius-sm);color:#fff8f0;font-family:inherit;font-size:.85rem;padding:9px 18px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .2s}
-.btn-ai:hover{opacity:.88}
-.btn-ai:disabled{opacity:.5;cursor:not-allowed}
+
 .save-row{display:flex;gap:8px;margin-top:14px}
 .save-row input{flex:1}
 .save-row .btn-primary{width:auto;white-space:nowrap;padding:9px 14px;font-size:.82rem}
@@ -201,11 +191,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--red)}
     </div>
     <div class="calc-bar" id="calcBar"></div>
     <div class="card-inner interp-block" id="interpBlock"></div>
-    <div class="card-inner ai-block">
-      <div id="aiContent">
-        <button class="btn-ai" id="btnAI">🤖 請 AI 解讀此卦</button>
-      </div>
-    </div>
+
     <div class="save-row">
       <input type="text" id="saveNote" placeholder="加上備注（可留空）" maxlength="80"/>
       <button class="btn-primary" id="btnSave">📝 存入筆記</button>
@@ -351,44 +337,10 @@ function renderResult(res,q){
   document.getElementById('calcBar').innerHTML=`農曆 ${res.lunar.monthName} 初${res.lunar.day}日${fb}｜${res.shichen.name}<br>月宮：<strong>${res.monthPalace.name}</strong> → 日宮：<strong>${res.dayPalace.name}</strong> → 時宮（主卦）：<strong>${g.name}</strong>`;
   const qk=detectQ(q),interp=g.meanings[qk]||g.meanings.general;
   document.getElementById('interpBlock').innerHTML=`<div class="interp-block"><h3>解卦</h3>${q?`<div class="interp-row"><span class="i-label">占問</span><span class="i-text">${q}</span></div>`:''}<div class="interp-row"><span class="i-label">論斷</span><span class="i-text">${interp}</span></div><div class="interp-row"><span class="i-label">象意</span><span class="i-text">${g.keywords.join('、')}</span></div><div class="interp-row"><span class="i-label">詳解</span><span class="i-text">${g.detail}</span></div></div>`;
-  document.getElementById('aiContent').innerHTML=`<button class="btn-ai" id="btnAI">🤖 請 AI 解讀此卦</button>`;
-  document.getElementById('btnAI').addEventListener('click',doAI);
   document.getElementById('resultArea').style.display='block';
   document.getElementById('resultArea').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-async function doAI(){
-  if(!cur)return;
-  const g=cur.mainGua,q=curQ||'（未填寫占問事項）';
-  const prompt=`你是一位精通小六壬術數的易學顧問，請根據以下起卦結果，給出深度、具體、實用的解讀與建議。
-
-【卦象】主卦：${g.name}（${g.natureText}）
-【神煞】${g.stars}
-【象意】${g.keywords.join('、')}
-【農曆】${cur.lunar.monthName} 初${cur.lunar.day}日
-【時辰】${cur.shichen.name}
-【推算】月宮${cur.monthPalace.name} → 日宮${cur.dayPalace.name} → 時宮${g.name}
-【占問】${q}
-
-請從以下角度解析：
-1. 卦象總論（此卦在此時此問的核心意涵）
-2. 針對「${q}」的具體指引
-3. 近期注意事項（趨吉避凶的建議）
-4. 最佳行動時機建議
-
-語氣要像一位有智慧的老師，結合傳統術數與實際生活，給出具體可操作的建議。以繁體中文回覆，約300字。`;
-  document.getElementById('aiContent').innerHTML=`<div class="ai-loading"><span>●</span><span>●</span><span>●</span>&nbsp;AI 解讀中…</div>`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();
-    const text=data.content?.map(b=>b.text||'').join('')||'（解讀失敗，請稍後再試）';
-    document.getElementById('aiContent').innerHTML=`<h3 style="color:var(--red);font-size:.88rem;margin-bottom:10px;font-weight:400">✨ AI 深度解讀</h3><div class="ai-text">${text}</div><button class="btn-ai" id="btnAI" style="margin-top:10px">🔄 重新解讀</button>`;
-    document.getElementById('btnAI').addEventListener('click',doAI);
-  }catch(e){
-    document.getElementById('aiContent').innerHTML=`<div style="color:var(--red2);font-size:.85rem">解讀失敗：${e.message}</div><button class="btn-ai" id="btnAI" style="margin-top:8px">🔄 重試</button>`;
-    document.getElementById('btnAI').addEventListener('click',doAI);
-  }
-}
 
 const SK='liuren_v2';
 const loadN=()=>{try{return JSON.parse(localStorage.getItem(SK))||[];}catch{return[];}};
