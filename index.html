@@ -1,125 +1,444 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1a2e1a" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="小六壬" />
-  <title>小六壬占卜</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#8b1a1a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="小六壬"/>
+<title>小六壬占卜</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f0e8;--bg2:#ede6d8;--bg3:#fff8f0;
+  --red:#8b1a1a;--red2:#c0392b;--red-light:#d4a0a0;--red-pale:#fae8e0;
+  --gold:#c8a84b;--gold2:#d4940a;
+  --ink:#2a1008;--ink2:#5a3020;--ink3:#8a6050;
+  --border:#d4b0a0;--border2:#e8c8b8;
+  --card:#fff8f2;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 2px 12px rgba(139,26,26,0.10);
+}
+body{font-family:'Georgia','Times New Roman',serif;background:var(--bg);color:var(--ink);min-height:100dvh}
+header{background:var(--red);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(139,26,26,0.3)}
+.header-inner{max-width:640px;margin:0 auto;padding:10px 16px 0}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.logo-glyph{font-size:1.8rem;color:var(--gold);animation:spin 20s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo-text h1{font-size:1.3rem;color:var(--gold);letter-spacing:.12em;font-weight:400}
+.logo-text p{font-size:.7rem;color:#d4a0a0;letter-spacing:.08em}
+.tabs{display:flex}
+.tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:#d4a0a0;font-family:inherit;font-size:.88rem;padding:7px 4px;cursor:pointer;letter-spacing:.06em;transition:color .2s,border-color .2s}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab:hover{color:#f0d0a0}
+.panel{display:none;max-width:640px;margin:0 auto;padding:16px 14px 80px}
+.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card-title{font-size:.9rem;color:var(--red);letter-spacing:.1em;margin-bottom:14px;font-weight:400;border-bottom:1px solid var(--border2);padding-bottom:8px}
+.card-inner{background:var(--red-pale);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-top:12px}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+label{font-size:.78rem;color:var(--ink2);letter-spacing:.05em}
+input[type="datetime-local"],input[type="text"],select,textarea{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--ink);font-family:inherit;font-size:.9rem;padding:9px 12px;width:100%;outline:none;transition:border-color .2s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--red)}
+input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:sepia(1) saturate(3) hue-rotate(320deg) brightness(.7)}
+.quick-q-label{font-size:.78rem;color:var(--ink2);margin-bottom:6px;letter-spacing:.05em}
+.quick-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.q-chip{background:var(--red-pale);border:1px solid var(--border);border-radius:20px;color:var(--red);font-family:inherit;font-size:.78rem;padding:4px 12px;cursor:pointer;transition:all .15s}
+.q-chip:hover,.q-chip.sel{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-primary{background:linear-gradient(135deg,var(--red),var(--red2));border:none;border-radius:var(--radius-sm);color:#fff8f0;font-family:inherit;font-size:.95rem;font-weight:700;letter-spacing:.1em;padding:12px 24px;cursor:pointer;width:100%;transition:opacity .2s,transform .1s;box-shadow:0 2px 8px rgba(139,26,26,0.25)}
+.btn-primary:hover{opacity:.9}
+.btn-primary:active{transform:scale(.98)}
+.btn-ghost{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--ink2);font-family:inherit;font-size:.78rem;padding:5px 12px;cursor:pointer;transition:all .2s;margin-top:4px;align-self:flex-start}
+.btn-ghost:hover{border-color:var(--red);color:var(--red)}
+.btn-ghost.danger:hover{border-color:var(--red2);color:var(--red2)}
+.result-top{display:flex;align-items:flex-start;gap:18px;margin-bottom:14px}
+.finger-wrap{flex-shrink:0;width:100px;height:175px}
+.finger-wrap svg{width:100%;height:100%}
+.result-info{flex:1}
+.gua-name-big{font-size:2.2rem;color:var(--red);letter-spacing:.12em;line-height:1.1;margin-bottom:4px}
+.gua-stars{font-size:.82rem;color:var(--ink3);margin-bottom:6px}
+.gua-badge{display:inline-block;font-size:.75rem;padding:2px 10px;border-radius:20px;letter-spacing:.05em}
+.badge-ji{background:rgba(46,158,90,.12);color:#1a6a3a;border:1px solid rgba(46,158,90,.3)}
+.badge-xiong{background:rgba(192,57,43,.1);color:var(--red2);border:1px solid rgba(192,57,43,.25)}
+.badge-ping{background:rgba(200,168,75,.15);color:#7a5a10;border:1px solid rgba(200,168,75,.3)}
+.calc-bar{font-size:.75rem;color:var(--ink3);background:var(--bg2);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:12px;line-height:1.8}
+.calc-bar strong{color:var(--red)}
+.interp-block h3{font-size:.88rem;color:var(--red);margin-bottom:10px;font-weight:400;letter-spacing:.08em}
+.interp-row{display:flex;gap:10px;margin-bottom:8px;font-size:.85rem;line-height:1.65}
+.i-label{color:var(--ink3);white-space:nowrap;min-width:44px;font-size:.76rem;padding-top:1px}
+.i-text{color:var(--ink)}
+.ai-block{margin-top:0}
+.ai-block h3{font-size:.88rem;color:var(--red);margin-bottom:10px;font-weight:400;letter-spacing:.08em}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--ink3);font-size:.85rem;padding:8px 0}
+.ai-loading span{display:inline-block;animation:blink 1.2s infinite}
+.ai-loading span:nth-child(2){animation-delay:.2s}
+.ai-loading span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.ai-text{font-size:.88rem;line-height:1.9;color:var(--ink);white-space:pre-wrap}
+.btn-ai{background:linear-gradient(135deg,#6a1a1a,var(--red));border:none;border-radius:var(--radius-sm);color:#fff8f0;font-family:inherit;font-size:.85rem;padding:9px 18px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .2s}
+.btn-ai:hover{opacity:.88}
+.btn-ai:disabled{opacity:.5;cursor:not-allowed}
+.save-row{display:flex;gap:8px;margin-top:14px}
+.save-row input{flex:1}
+.save-row .btn-primary{width:auto;white-space:nowrap;padding:9px 14px;font-size:.82rem}
+.notes-hdr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;border-bottom:1px solid var(--border2);padding-bottom:10px}
+.notes-actions{display:flex;gap:8px;align-items:center}
+.notes-actions select{width:auto;font-size:.8rem;padding:5px 8px}
+.notes-list{display:flex;flex-direction:column;gap:8px}
+.empty-hint{color:var(--ink3);font-size:.85rem;text-align:center;padding:24px 0}
+.note-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px;cursor:pointer;transition:border-color .2s}
+.note-card:hover{border-color:var(--red-light)}
+.note-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.note-gua{font-size:1rem;color:var(--red);letter-spacing:.06em}
+.note-date{font-size:.7rem;color:var(--ink3)}
+.note-q{font-size:.82rem;color:var(--ink2);margin-bottom:4px}
+.note-memo{font-size:.8rem;color:var(--ink)}
+.note-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:6px}
+.vbadge{font-size:.7rem;padding:2px 8px;border-radius:12px}
+.vb-p{background:rgba(200,168,75,.2);color:#7a5a10}
+.vb-a{background:rgba(46,158,90,.15);color:#1a6a3a}
+.vb-i{background:rgba(192,57,43,.1);color:var(--red2)}
+.vb-x{background:rgba(100,100,180,.12);color:#4040a0}
+.vsel{background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--ink);font-family:inherit;font-size:.72rem;padding:2px 6px;cursor:pointer;width:auto}
+.note-acts{display:flex;gap:5px}
+.btn-del{background:none;border:1px solid var(--border);border-radius:5px;color:var(--red-light);font-size:.7rem;padding:2px 7px;cursor:pointer}
+.guide-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.guide-item{border-radius:var(--radius-sm);padding:12px;border-left:3px solid var(--border)}
+.guide-item.ji{background:rgba(46,158,90,.07);border-left-color:#2e9e5a}
+.guide-item.xiong{background:rgba(192,57,43,.06);border-left-color:var(--red2)}
+.guide-name{font-size:1rem;color:var(--red);margin-bottom:2px;letter-spacing:.08em}
+.guide-nature{font-size:.7rem;color:var(--ink3);margin-bottom:5px}
+.guide-kw{font-size:.78rem;color:var(--ink);line-height:1.7}
+.method-box h3{color:var(--red);font-size:.88rem;margin-bottom:8px;font-weight:400;letter-spacing:.08em}
+.method-box ol{padding-left:18px}
+.method-box li{font-size:.82rem;line-height:1.9;color:var(--ink)}
+.install-banner{background:linear-gradient(135deg,var(--red),#6a1a1a);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.install-icon{font-size:1.6rem;flex-shrink:0}
+.install-text{flex:1}
+.install-text h4{color:var(--gold);font-size:.88rem;font-weight:400;letter-spacing:.06em;margin-bottom:2px}
+.install-text p{color:#d4a0a0;font-size:.75rem;line-height:1.5}
+.btn-install{background:var(--gold);border:none;border-radius:var(--radius-sm);color:var(--ink);font-family:inherit;font-size:.78rem;font-weight:700;padding:7px 14px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.modal-overlay{position:fixed;inset:0;background:rgba(42,16,8,.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);max-width:520px;width:100%;max-height:80dvh;overflow-y:auto;padding:20px;position:relative;box-shadow:0 8px 32px rgba(139,26,26,.2)}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--ink3);font-size:1.1rem;cursor:pointer}
+@media(max-width:400px){
+  .result-top{flex-direction:column}
+  .finger-wrap{width:90px;height:155px}
+  .guide-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
-  <div id="app">
-    <!-- Header -->
-    <header>
-      <div class="header-inner">
-        <div class="logo-area">
-          <span class="logo-glyph">☯</span>
-          <div>
-            <h1>小六壬</h1>
-            <p class="subtitle">依時起卦・問事解惑</p>
-          </div>
-        </div>
-        <nav class="tab-nav">
-          <button class="tab-btn active" data-tab="divination">起卦</button>
-          <button class="tab-btn" data-tab="notes">筆記</button>
-          <button class="tab-btn" data-tab="guide">宮位</button>
-        </nav>
-      </div>
-    </header>
-
-    <!-- Tab: 起卦 -->
-    <main id="tab-divination" class="tab-panel active">
-      <section class="divination-form card">
-        <h2 class="section-title">起卦設定</h2>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>占卜時間</label>
-            <input type="datetime-local" id="divTime" />
-            <button class="btn-ghost" id="btnNow">用現在時間</button>
-          </div>
-          <div class="form-group">
-            <label>占問事項（選填）</label>
-            <input type="text" id="divQuestion" placeholder="例：此事能否成？" maxlength="50" />
-          </div>
-        </div>
-        <button class="btn-primary" id="btnDivine">🔮 起卦</button>
-      </section>
-
-      <!-- Result -->
-      <section class="result-area card" id="resultArea" style="display:none">
-        <h2 class="section-title">卦象結果</h2>
-        <div class="hexagram-display">
-          <div class="palace-wheel" id="palaceWheel">
-            <!-- 六宮輪盤 by JS -->
-          </div>
-          <div class="result-main">
-            <div class="gua-name" id="guaName">—</div>
-            <div class="gua-stars" id="guaStars">—</div>
-            <div class="gua-nature" id="guaNature"></div>
-          </div>
-        </div>
-        <div class="calc-detail" id="calcDetail"></div>
-        <div class="interpretation card-inner" id="interpretation"></div>
-        <div class="save-row">
-          <input type="text" id="saveNote" placeholder="加上備注（可留空）" maxlength="80" />
-          <button class="btn-primary" id="btnSave">📝 存入筆記</button>
-        </div>
-      </section>
-    </main>
-
-    <!-- Tab: 筆記 -->
-    <main id="tab-notes" class="tab-panel">
-      <section class="card">
-        <div class="notes-header">
-          <h2 class="section-title">占卜筆記</h2>
-          <div class="notes-actions">
-            <select id="filterVerify">
-              <option value="">全部</option>
-              <option value="pending">待驗證</option>
-              <option value="accurate">準確</option>
-              <option value="inaccurate">不準</option>
-              <option value="partial">部分準</option>
-            </select>
-            <button class="btn-ghost danger" id="btnClearAll">清除全部</button>
-          </div>
-        </div>
-        <div id="notesList" class="notes-list">
-          <p class="empty-hint">尚無筆記，起卦後可存入</p>
-        </div>
-      </section>
-    </main>
-
-    <!-- Tab: 宮位說明 -->
-    <main id="tab-guide" class="tab-panel">
-      <section class="card">
-        <h2 class="section-title">小六壬六宮速查</h2>
-        <div class="guide-grid" id="guideGrid"></div>
-        <div class="method-box card-inner">
-          <h3>起卦方法</h3>
-          <ol>
-            <li>取農曆月份數（1–12）定<strong>月宮</strong>，從大安起算</li>
-            <li>加農曆日期數，逢六進一，得<strong>日宮</strong></li>
-            <li>加時辰數（子=1, 丑=2…亥=12），逢六進一，得<strong>時宮</strong>（主卦）</li>
-            <li>主卦即時宮所在六宮</li>
-          </ol>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- Modal for note detail -->
-  <div class="modal-overlay" id="modalOverlay" style="display:none">
-    <div class="modal card">
-      <button class="modal-close" id="modalClose">✕</button>
-      <div id="modalContent"></div>
+<header>
+  <div class="header-inner">
+    <div class="logo-row">
+      <span class="logo-glyph">☯</span>
+      <div class="logo-text"><h1>小六壬</h1><p>依時起卦・問事解惑</p></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="div">起卦</button>
+      <button class="tab" data-tab="notes">筆記</button>
+      <button class="tab" data-tab="guide">宮位</button>
     </div>
   </div>
+</header>
 
-  <script src="app.js"></script>
+<div id="panel-div" class="panel active">
+  <div class="install-banner" id="installBanner" style="display:none">
+    <span class="install-icon">📱</span>
+    <div class="install-text">
+      <h4>安裝到手機主畫面</h4>
+      <p>離線可用，像 App 一樣操作</p>
+    </div>
+    <button class="btn-install" id="btnInstall">安裝</button>
+  </div>
+  <div class="card">
+    <div class="card-title">起卦設定</div>
+    <div class="form-group">
+      <label>占卜時間（24小時制）</label>
+      <input type="datetime-local" id="divTime"/>
+      <button class="btn-ghost" id="btnNow">用現在時間</button>
+    </div>
+    <div class="form-group">
+      <div class="quick-q-label">占問事項（快選或自填）</div>
+      <div class="quick-btns" id="quickBtns">
+        <button class="q-chip" data-q="此事能否順利成功？">事業</button>
+        <button class="q-chip" data-q="財運如何？投資是否有利？">財運</button>
+        <button class="q-chip" data-q="感情狀況如何？">感情</button>
+        <button class="q-chip" data-q="健康狀況如何？">健康</button>
+        <button class="q-chip" data-q="出行是否順利？">出行</button>
+        <button class="q-chip" data-q="考試是否能順利？">考試</button>
+        <button class="q-chip" data-q="官司訴訟結果如何？">官司</button>
+        <button class="q-chip" data-q="合作是否可行？">合作</button>
+      </div>
+      <input type="text" id="divQuestion" placeholder="或自行輸入占問事項…" maxlength="60"/>
+    </div>
+    <button class="btn-primary" id="btnDivine">🔮 起卦</button>
+  </div>
+  <div class="card" id="resultArea" style="display:none">
+    <div class="card-title">卦象結果</div>
+    <div class="result-top">
+      <div class="finger-wrap" id="fingerWrap"></div>
+      <div class="result-info">
+        <div class="gua-name-big" id="guaName">—</div>
+        <div class="gua-stars" id="guaStars">—</div>
+        <span class="gua-badge" id="guaBadge"></span>
+      </div>
+    </div>
+    <div class="calc-bar" id="calcBar"></div>
+    <div class="card-inner interp-block" id="interpBlock"></div>
+    <div class="card-inner ai-block">
+      <div id="aiContent">
+        <button class="btn-ai" id="btnAI">🤖 請 AI 解讀此卦</button>
+      </div>
+    </div>
+    <div class="save-row">
+      <input type="text" id="saveNote" placeholder="加上備注（可留空）" maxlength="80"/>
+      <button class="btn-primary" id="btnSave">📝 存入筆記</button>
+    </div>
+  </div>
+</div>
+
+<div id="panel-notes" class="panel">
+  <div class="card">
+    <div class="notes-hdr">
+      <div class="card-title" style="margin:0;border:none;padding:0">占卜筆記</div>
+      <div class="notes-actions">
+        <select id="filterV">
+          <option value="">全部</option>
+          <option value="p">待驗證</option>
+          <option value="a">準確</option>
+          <option value="i">不準</option>
+          <option value="x">部分準</option>
+        </select>
+        <button class="btn-ghost danger" id="btnClear">清除全部</button>
+      </div>
+    </div>
+    <div class="notes-list" id="notesList"></div>
+  </div>
+</div>
+
+<div id="panel-guide" class="panel">
+  <div class="card">
+    <div class="card-title">小六壬六宮速查</div>
+    <div class="guide-grid" id="guideGrid"></div>
+    <div class="card-inner method-box">
+      <h3>起卦方法</h3>
+      <ol>
+        <li>取農曆月份數，從大安起算，得<strong>月宮</strong></li>
+        <li>從月宮起，數農曆日期，初一停月宮，得<strong>日宮</strong></li>
+        <li>從日宮起，子時停日宮，依時辰序推算，得<strong>時宮（主卦）</strong></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" style="display:none">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+const LIUREN=[
+  {id:1,name:'大安',nature:'ji',natureText:'大吉',stars:'天乙貴人',color:'#2e9e5a',textColor:'#fff',
+   keywords:['平穩安定','事緩則圓','靜待為吉','利守不利動'],
+   meanings:{general:'事情穩定祥和，宜靜不宜動，稍作等待則吉，凡事從容應對。',seek:'所求可得，但需耐心等候，不可急進，循序漸進最為有利。',travel:'出行一路平安，沿途無阻，可從容出發。',wealth:'財運平穩，守成為要，固本培元勝於冒進。',health:'身體無大礙，若有小恙，靜養調理即可恢復。',relations:'關係和諧美滿，宜以柔克剛，溝通協調，忌強硬衝突。',exam:'考試發揮穩定，成績如預期，平常心應考最佳。',lawsuit:'訴訟宜和解，拖延有利，切勿急於求成。',business:'合作穩健可行，長期共事為宜。'},
+   detail:'大安象天乙貴人坐鎮，主萬事平安穩固。凡遇大安，心中無憂，靜守本位則諸事順遂。宜居不宜動，等待時機自然來臨。'},
+  {id:2,name:'留連',nature:'xiong',natureText:'中平偏凶',stars:'六合',color:'#c87820',textColor:'#fff',
+   keywords:['事情延遲','反覆難決','進退兩難','宜等待時機'],
+   meanings:{general:'事情反覆拖延，難以一錘定音，宜靜觀其變，等待時機成熟。',seek:'所求難以即刻如願，事情仍在停滯階段，需再多等候一段時日。',travel:'行程恐有延誤或臨時變故，出發前務必確認各項安排。',wealth:'財來財往難以積累，近期不宜大額投資或借貸。',health:'病情反反覆覆，調養需持之以恆，切勿半途而廢。',relations:'感情或合作進退兩難，雙方似乎各有顧慮，宜冷靜觀察再做決定。',exam:'考試狀態不穩定，成績或有起伏，需加強薄弱環節。',lawsuit:'訴訟纏訟拖延，短期難以解決，需做好持久戰準備。',business:'合作細節尚有疑慮，暫緩簽約，再行商議。'},
+   detail:'留連象事緒纏繞，進退維谷。六合雖主合和，然此時機緣未至，強行推動反生阻礙。靜待水落石出，方為上策。'},
+  {id:3,name:'速喜',nature:'ji',natureText:'吉',stars:'朱雀',color:'#d4940a',textColor:'#fff8e0',
+   keywords:['喜事快至','宜速行動','貴人相助','消息傳來'],
+   meanings:{general:'喜事即將到來，宜把握時機迅速行動，貴人自會相助，佳音近在咫尺。',seek:'所求可以成就，且進展較快，主動出擊大有裨益。',travel:'出行一路順風，途中可能有意外驚喜或收穫。',wealth:'財運亨通，適合積極出手，快進快出為佳，守株待兔則失良機。',health:'病情好轉迅速，精神狀態振作，可加快療程進度。',relations:'感情進展順速，喜訊近在眼前，宜積極主動表達心意。',exam:'考試發揮出色，可能超出預期，放手一搏。',lawsuit:'訴訟有利，官方或第三方將給予支持，積極應訴。',business:'合作時機成熟，可速下決定，切勿猶豫錯失良機。'},
+   detail:'速喜象朱雀報喜，吉信捷至。凡事宜速不宜遲，主動積極方能把握機緣。貴人在側，只需開口相求，喜事自然到來。'},
+  {id:4,name:'赤口',nature:'xiong',natureText:'凶',stars:'白虎',color:'#c02828',textColor:'#fff',
+   keywords:['口舌是非','爭端衝突','小人作祟','謹言慎行'],
+   meanings:{general:'口舌是非多發，各種紛爭在所難免，此時謹言慎行、低調行事方為上策。',seek:'所求阻力重重，恐有小人從中作梗，暫緩行動，待風頭過後再議。',travel:'出行途中易遇口角糾紛或意外事故，能延後則延後，不得已出行需格外謹慎。',wealth:'財路受阻，恐生糾紛或損失，嚴禁衝動投資，保守觀望為宜。',health:'病情有加重跡象或出現新的症狀，需立即就醫，切勿拖延。',relations:'關係出現明顯摩擦，嚴防誤解加深或第三者介入，多聆聽少爭辯。',exam:'考試易緊張失常，審題需反覆確認，切勿粗心大意。',lawsuit:'訴訟不利，對方可能已有準備，需重新評估策略。',business:'合作恐有爭議，合約條款需逐條審查，防範法律糾紛。'},
+   detail:'赤口象白虎張口，口舌之災易起。凡遇此卦，言多必失，行事宜低調謙遜。避開是非之地，靜待白虎退位，方可化險為夷。'},
+  {id:5,name:'小吉',nature:'ji',natureText:'小吉',stars:'六合',color:'#1a7a9a',textColor:'#fff',
+   keywords:['小有收穫','循序漸進','謀事漸成','平和順遂'],
+   meanings:{general:'事情雖非一步登天，但循序漸進，平和順遂，自有小收穫，知足者常樂。',seek:'所求可以達成，但規模或成果或許比預期稍小，量力而行，知足知止。',travel:'出行過程平順安穩，或許有小驚喜，整體令人滿意。',wealth:'小財陸續可得，穩健理財方為正道，莫貪一時之大利。',health:'整體健康狀況良好，小病小痛不礙大事，注意日常作息規律。',relations:'關係溫和穩定，雙方均感舒適，適合進一步深化感情。',exam:'考試成績中規中矩，略有進步，繼續努力可期。',lawsuit:'訴訟偏向有利，但結果或比預期小，接受調解不失為好選擇。',business:'合作可行，初期規模較小，循序漸進擴展為宜。'},
+   detail:'小吉象六合溫潤，吉中帶穩。雖非大富大貴，卻也平和順遂。此卦教人知足惜福，小確幸積累終成大福。'},
+  {id:6,name:'空亡',nature:'xiong',natureText:'大凶',stars:'玄武',color:'#6a30b0',textColor:'#fff',
+   keywords:['諸事落空','計劃落空','不宜出行','靜守待時'],
+   meanings:{general:'此時諸事皆不宜，計劃恐將落空，宜靜守原位，切不可強行推動任何事情。',seek:'此時出手恐是竹籃打水一場空，強求不得，暫緩蓄力，等待時機轉變。',travel:'出行極為不利，恐有失物、迷途甚至更嚴重之事，強烈建議留守待機。',wealth:'財運跌入谷底，嚴防詐騙損失，任何投資皆需三思，此時絕對不宜出手。',health:'健康有潛在隱患，必須立即就醫做全面檢查，切勿諱疾忌醫。',relations:'感情或合作關係面臨嚴峻考驗，破裂風險較高，需傾力維護。',exam:'考試狀態極差，需做最壞打算，事後深入檢討。',lawsuit:'訴訟極為不利，敗訴機率高，建議盡快尋求庭外和解。',business:'合作時機極差，對方可能並非誠意，立即暫停談判再做評估。'},
+   detail:'空亡象玄武沉潛，萬事歸零。此卦非永久之凶，乃天地告誡靜守之時。蟄伏積蓄，待空亡之氣散盡，方是出擊良機。'},
+];
+const SHICHEN=[
+  {name:'子時',range:[23,0],num:1},{name:'丑時',range:[1,2],num:2},{name:'寅時',range:[3,4],num:3},
+  {name:'卯時',range:[5,6],num:4},{name:'辰時',range:[7,8],num:5},{name:'巳時',range:[9,10],num:6},
+  {name:'午時',range:[11,12],num:7},{name:'未時',range:[13,14],num:8},{name:'申時',range:[15,16],num:9},
+  {name:'酉時',range:[17,18],num:10},{name:'戌時',range:[19,20],num:11},{name:'亥時',range:[21,22],num:12},
+];
+const LM=['正月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+
+function getLunar(d){
+  try{
+    const fmt=new Intl.DateTimeFormat('zh-TW-u-ca-chinese',{month:'numeric',day:'numeric'});
+    const parts=fmt.formatToParts(d);let m=1,day=1;
+    for(const p of parts){if(p.type==='month')m=parseInt(p.value);if(p.type==='day')day=parseInt(p.value);}
+    return{month:m,day:day,monthName:LM[m-1]};
+  }catch{const m=d.getMonth()+1,day=d.getDate();return{month:m,day:day,monthName:LM[m-1],fallback:true};}
+}
+function getSC(h){if(h===23)return SHICHEN[0];for(const s of SHICHEN)if(h>=s.range[0]&&h<=s.range[1])return s;return SHICHEN[0];}
+function calc(date){
+  const l=getLunar(date),sc=getSC(date.getHours());
+  const mi=(l.month-1)%6,di=(mi+l.day-1)%6,ti=(di+sc.num-1)%6;
+  return{lunar:l,shichen:sc,monthPalace:LIUREN[mi],dayPalace:LIUREN[di],mainGua:LIUREN[ti]};
+}
+
+function buildFinger(activeId){
+  const FW=24,FW2=20,KH=26,GAP=7,PH=20;
+  const x1=16,x2=x1+FW+GAP,x3=x2+FW2+GAP;
+  const yT=8,yM=yT+KH+3,yB=yM+KH+3,yP=yB+KH+3,H=yP+PH+14;
+  const kk=[{id:1,x:x1,y:yB,w:FW,l:'大安'},{id:2,x:x1,y:yM,w:FW,l:'留連'},{id:3,x:x1,y:yT,w:FW,l:'速喜'},{id:4,x:x2,y:yT,w:FW2,l:'赤口'},{id:5,x:x2,y:yM,w:FW2,l:'小吉'},{id:6,x:x2,y:yB,w:FW2,l:'空亡'}];
+  const rr=[{x:x3,y:yT,w:FW},{x:x3,y:yM,w:FW},{x:x3,y:yB,w:FW}];
+  const ak=kk.find(k=>k.id===activeId),ty=ak?ak.y+KH/2:yB+KH/2;
+  let s=`<svg viewBox="0 0 ${x3+FW+14} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<rect x="${x1}" y="${yP}" width="${x3+FW-x1}" height="${PH}" rx="4" fill="#e8d0c0" stroke="#d4b0a0" stroke-width="1"/>`;
+  rr.forEach(r=>{s+=`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${KH}" rx="3" fill="#f0e4d8" stroke="#d4b0a0" stroke-width="0.8"/>`;s+=`<line x1="${r.x+3}" y1="${r.y+KH-1}" x2="${r.x+r.w-3}" y2="${r.y+KH-1}" stroke="#c8a898" stroke-width="0.5"/>`;});
+  kk.forEach(k=>{
+    const g=LIUREN[k.id-1],a=k.id===activeId;
+    s+=`<rect x="${k.x}" y="${k.y}" width="${k.w}" height="${KH}" rx="3" fill="${a?g.color:'#f0e4d8'}" stroke="${a?g.color:'#d4b0a0'}" stroke-width="${a?2:.8}"/>`;
+    if(!a)s+=`<line x1="${k.x+3}" y1="${k.y+KH-1}" x2="${k.x+k.w-3}" y2="${k.y+KH-1}" stroke="#c8a898" stroke-width="0.4"/>`;
+    s+=`<text x="${k.x+k.w/2}" y="${k.y+KH/2+3.5}" text-anchor="middle" font-size="7.5" font-family="serif" fill="${a?g.textColor:'#8a6050'}" font-weight="${a?'bold':'normal'}">${k.l}</text>`;
+    if(a)s+=`<rect x="${k.x-2}" y="${k.y-2}" width="${k.w+4}" height="${KH+4}" rx="5" fill="none" stroke="${g.color}" stroke-width="1.5" opacity="0.4"/>`;
+  });
+  const tbY=Math.max(18,Math.min(ty+8,H-8));
+  s+=`<path d="M6,${ty} C2,${ty-6} 2,${tbY-10} 8,${tbY} L16,${tbY+4} L14,${ty+3} Z" fill="#e8d0c0" stroke="#d4b0a0" stroke-width="0.8"/>`;
+  s+=`<ellipse cx="9" cy="${ty}" rx="3" ry="3.5" fill="#ddc0b0" stroke="#c8a898" stroke-width="0.6"/>`;
+  if(ak)s+=`<line x1="${x1-2}" y1="${ty}" x2="${ak.x+1}" y2="${ak.y+KH/2}" stroke="${LIUREN[activeId-1].color}" stroke-width="1" stroke-dasharray="2,2" opacity="0.7"/>`;
+  s+=`</svg>`;return s;
+}
+
+let cur=null,curQ='';
+function detectQ(q){
+  if(!q)return'general';
+  if(/財|錢|投資|生意|股/.test(q))return'wealth';
+  if(/出行|旅|出差|出門/.test(q))return'travel';
+  if(/病|健康|身體|醫/.test(q))return'health';
+  if(/感情|婚|戀|愛|交往|伴侶/.test(q))return'relations';
+  if(/考試|考|學|成績/.test(q))return'exam';
+  if(/官司|訴訟|法律/.test(q))return'lawsuit';
+  if(/合作|合約|夥伴/.test(q))return'business';
+  return'general';
+}
+function renderResult(res,q){
+  const g=res.mainGua;
+  document.getElementById('fingerWrap').innerHTML=buildFinger(g.id);
+  document.getElementById('guaName').textContent=g.name;
+  document.getElementById('guaStars').textContent='神煞：'+g.stars;
+  const b=document.getElementById('guaBadge');b.textContent=g.natureText;
+  b.className='gua-badge '+(g.nature==='ji'?'badge-ji':g.nature==='xiong'?'badge-xiong':'badge-ping');
+  const fb=res.lunar.fallback?'（估算）':'';
+  document.getElementById('calcBar').innerHTML=`農曆 ${res.lunar.monthName} 初${res.lunar.day}日${fb}｜${res.shichen.name}<br>月宮：<strong>${res.monthPalace.name}</strong> → 日宮：<strong>${res.dayPalace.name}</strong> → 時宮（主卦）：<strong>${g.name}</strong>`;
+  const qk=detectQ(q),interp=g.meanings[qk]||g.meanings.general;
+  document.getElementById('interpBlock').innerHTML=`<div class="interp-block"><h3>解卦</h3>${q?`<div class="interp-row"><span class="i-label">占問</span><span class="i-text">${q}</span></div>`:''}<div class="interp-row"><span class="i-label">論斷</span><span class="i-text">${interp}</span></div><div class="interp-row"><span class="i-label">象意</span><span class="i-text">${g.keywords.join('、')}</span></div><div class="interp-row"><span class="i-label">詳解</span><span class="i-text">${g.detail}</span></div></div>`;
+  document.getElementById('aiContent').innerHTML=`<button class="btn-ai" id="btnAI">🤖 請 AI 解讀此卦</button>`;
+  document.getElementById('btnAI').addEventListener('click',doAI);
+  document.getElementById('resultArea').style.display='block';
+  document.getElementById('resultArea').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+async function doAI(){
+  if(!cur)return;
+  const g=cur.mainGua,q=curQ||'（未填寫占問事項）';
+  const prompt=`你是一位精通小六壬術數的易學顧問，請根據以下起卦結果，給出深度、具體、實用的解讀與建議。
+
+【卦象】主卦：${g.name}（${g.natureText}）
+【神煞】${g.stars}
+【象意】${g.keywords.join('、')}
+【農曆】${cur.lunar.monthName} 初${cur.lunar.day}日
+【時辰】${cur.shichen.name}
+【推算】月宮${cur.monthPalace.name} → 日宮${cur.dayPalace.name} → 時宮${g.name}
+【占問】${q}
+
+請從以下角度解析：
+1. 卦象總論（此卦在此時此問的核心意涵）
+2. 針對「${q}」的具體指引
+3. 近期注意事項（趨吉避凶的建議）
+4. 最佳行動時機建議
+
+語氣要像一位有智慧的老師，結合傳統術數與實際生活，給出具體可操作的建議。以繁體中文回覆，約300字。`;
+  document.getElementById('aiContent').innerHTML=`<div class="ai-loading"><span>●</span><span>●</span><span>●</span>&nbsp;AI 解讀中…</div>`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const text=data.content?.map(b=>b.text||'').join('')||'（解讀失敗，請稍後再試）';
+    document.getElementById('aiContent').innerHTML=`<h3 style="color:var(--red);font-size:.88rem;margin-bottom:10px;font-weight:400">✨ AI 深度解讀</h3><div class="ai-text">${text}</div><button class="btn-ai" id="btnAI" style="margin-top:10px">🔄 重新解讀</button>`;
+    document.getElementById('btnAI').addEventListener('click',doAI);
+  }catch(e){
+    document.getElementById('aiContent').innerHTML=`<div style="color:var(--red2);font-size:.85rem">解讀失敗：${e.message}</div><button class="btn-ai" id="btnAI" style="margin-top:8px">🔄 重試</button>`;
+    document.getElementById('btnAI').addEventListener('click',doAI);
+  }
+}
+
+const SK='liuren_v2';
+const loadN=()=>{try{return JSON.parse(localStorage.getItem(SK))||[];}catch{return[];}};
+const saveN=n=>localStorage.setItem(SK,JSON.stringify(n));
+const VM={p:{l:'待驗證',c:'vb-p'},a:{l:'✓ 準確',c:'vb-a'},i:{l:'✗ 不準',c:'vb-i'},x:{l:'△ 部分',c:'vb-x'}};
+
+function renderNotes(f=''){
+  let notes=loadN();if(f)notes=notes.filter(n=>n.verify===f);
+  const el=document.getElementById('notesList');
+  if(!notes.length){el.innerHTML='<p class="empty-hint">尚無筆記</p>';return;}
+  el.innerHTML=notes.map(n=>{
+    const v=VM[n.verify]||VM.p,dt=new Date(n.ts).toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return`<div class="note-card" data-id="${n.id}"><div class="note-top"><span class="note-gua">${n.guaName}｜${n.guaNT}</span><span class="note-date">${dt}</span></div>${n.q?`<div class="note-q">📌 ${n.q}</div>`:''} ${n.memo?`<div class="note-memo">${n.memo}</div>`:''}<div class="note-footer"><span class="vbadge ${v.c}">${v.l}</span><div class="note-acts"><select class="vsel" data-id="${n.id}"><option value="p" ${n.verify==='p'?'selected':''}>待驗證</option><option value="a" ${n.verify==='a'?'selected':''}>準確</option><option value="i" ${n.verify==='i'?'selected':''}>不準</option><option value="x" ${n.verify==='x'?'selected':''}>部分</option></select><button class="btn-del" data-id="${n.id}">刪</button></div></div></div>`;
+  }).join('');
+  el.querySelectorAll('.vsel').forEach(s=>s.addEventListener('change',e=>{e.stopPropagation();const notes2=loadN();const x=notes2.find(n=>n.id===s.dataset.id);if(x){x.verify=s.value;saveN(notes2);}renderNotes(document.getElementById('filterV').value);}));
+  el.querySelectorAll('.btn-del').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();if(confirm('確定刪除？')){saveN(loadN().filter(n=>n.id!==b.dataset.id));renderNotes(document.getElementById('filterV').value);}}));
+}
+
+function renderGuide(){
+  document.getElementById('guideGrid').innerHTML=LIUREN.map(g=>`<div class="guide-item ${g.nature}"><div class="guide-name">${g.name}</div><div class="guide-nature">${g.natureText}｜${g.stars}</div><div class="guide-kw">${g.keywords.join('・')}</div></div>`).join('');
+}
+
+let dPr=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dPr=e;document.getElementById('installBanner').style.display='flex';});
+window.addEventListener('appinstalled',()=>{document.getElementById('installBanner').style.display='none';});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  setNow();renderGuide();renderNotes();
+  document.getElementById('btnNow').addEventListener('click',setNow);
+  document.querySelectorAll('.q-chip').forEach(c=>c.addEventListener('click',()=>{
+    document.querySelectorAll('.q-chip').forEach(x=>x.classList.remove('sel'));
+    c.classList.add('sel');document.getElementById('divQuestion').value=c.dataset.q;
+  }));
+  document.getElementById('btnDivine').addEventListener('click',()=>{
+    const tv=document.getElementById('divTime').value;
+    if(!tv){alert('請先選擇時間');return;}
+    curQ=document.getElementById('divQuestion').value.trim();
+    cur=calc(new Date(tv));renderResult(cur,curQ);
+  });
+  document.getElementById('btnSave').addEventListener('click',()=>{
+    if(!cur)return;const g=cur.mainGua;
+    const notes=loadN();notes.unshift({id:Date.now().toString(),ts:new Date().toISOString(),guaName:g.name,guaNT:g.natureText,q:curQ,memo:document.getElementById('saveNote').value.trim(),verify:'p'});
+    saveN(notes);document.getElementById('saveNote').value='';alert('✅ 已存入筆記');renderNotes();
+  });
+  document.getElementById('filterV').addEventListener('change',e=>renderNotes(e.target.value));
+  document.getElementById('btnClear').addEventListener('click',()=>{if(confirm('確定清除所有筆記？')){localStorage.removeItem(SK);renderNotes();}});
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='notes')renderNotes(document.getElementById('filterV').value);
+  }));
+  document.getElementById('btnInstall').addEventListener('click',async()=>{
+    if(!dPr)return;dPr.prompt();const{outcome}=await dPr.userChoice;
+    if(outcome==='accepted')document.getElementById('installBanner').style.display='none';dPr=null;
+  });
+  document.getElementById('modalClose').addEventListener('click',()=>document.getElementById('modalOverlay').style.display='none');
+  document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')document.getElementById('modalOverlay').style.display='none';});
+});
+function setNow(){const n=new Date(),l=new Date(n.getTime()-n.getTimezoneOffset()*60000);document.getElementById('divTime').value=l.toISOString().slice(0,16);}
+if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
 </body>
 </html>
