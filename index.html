@@ -43,11 +43,16 @@ header{background:var(--red);position:sticky;top:0;z-index:100;box-shadow:0 2px 
 label{font-size:.78rem;color:var(--ink2);letter-spacing:.05em}
 input[type="datetime-local"],input[type="text"],select,textarea{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--ink);font-family:inherit;font-size:.9rem;padding:9px 12px;width:100%;outline:none;transition:border-color .2s;-webkit-appearance:none}
 input:focus,select:focus,textarea:focus{border-color:var(--red)}
-input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:sepia(1) saturate(3) hue-rotate(320deg) brightness(.7)}
 .quick-q-label{font-size:.78rem;color:var(--ink2);margin-bottom:6px;letter-spacing:.05em}
 .quick-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .q-chip{background:var(--red-pale);border:1px solid var(--border);border-radius:20px;color:var(--red);font-family:inherit;font-size:.78rem;padding:4px 12px;cursor:pointer;transition:all .15s}
 .q-chip:hover,.q-chip.sel{background:var(--red);color:#fff;border-color:var(--red)}
+.time-row{display:flex;align-items:center;gap:6px}
+.time-date{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--ink);font-family:inherit;font-size:.9rem;padding:9px 10px;outline:none;-webkit-appearance:none}
+.time-date:focus{border-color:var(--red)}
+.time-sel{width:64px;flex-shrink:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--ink);font-family:inherit;font-size:.9rem;padding:9px 6px;outline:none;-webkit-appearance:none;text-align:center}
+.time-sel:focus{border-color:var(--red)}
+.time-sep{font-size:.9rem;color:var(--ink2);flex-shrink:0}
 .btn-primary{background:linear-gradient(135deg,var(--red),var(--red2));border:none;border-radius:var(--radius-sm);color:#fff8f0;font-family:inherit;font-size:.95rem;font-weight:700;letter-spacing:.1em;padding:12px 24px;cursor:pointer;width:100%;transition:opacity .2s,transform .1s;box-shadow:0 2px 8px rgba(139,26,26,0.25)}
 .btn-primary:hover{opacity:.9}
 .btn-primary:active{transform:scale(.98)}
@@ -159,7 +164,13 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator{filter:sepia(1) 
     <div class="card-title">起卦設定</div>
     <div class="form-group">
       <label>占卜時間（24小時制）</label>
-      <input type="datetime-local" id="divTime"/>
+      <div class="time-row">
+        <input type="date" id="divDate" class="time-date"/>
+        <select id="divHour" class="time-sel"></select>
+        <span class="time-sep">時</span>
+        <select id="divMin" class="time-sel"></select>
+        <span class="time-sep">分</span>
+      </div>
       <button class="btn-ghost" id="btnNow">用現在時間</button>
     </div>
     <div class="form-group">
@@ -405,17 +416,20 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dPr=e;docum
 window.addEventListener('appinstalled',()=>{document.getElementById('installBanner').style.display='none';});
 
 document.addEventListener('DOMContentLoaded',()=>{
-  setNow();renderGuide();renderNotes();
+  initTimeSelects();setNow();renderGuide();renderNotes();
   document.getElementById('btnNow').addEventListener('click',setNow);
   document.querySelectorAll('.q-chip').forEach(c=>c.addEventListener('click',()=>{
     document.querySelectorAll('.q-chip').forEach(x=>x.classList.remove('sel'));
     c.classList.add('sel');document.getElementById('divQuestion').value=c.dataset.q;
   }));
   document.getElementById('btnDivine').addEventListener('click',()=>{
-    const tv=document.getElementById('divTime').value;
-    if(!tv){alert('請先選擇時間');return;}
+    const dateVal=document.getElementById('divDate').value;
+    const hourVal=document.getElementById('divHour').value;
+    const minVal=document.getElementById('divMin').value;
+    if(!dateVal){alert('請先選擇日期');return;}
+    const dt=new Date(`${dateVal}T${hourVal.padStart(2,'0')}:${minVal.padStart(2,'0')}:00`);
     curQ=document.getElementById('divQuestion').value.trim();
-    cur=calc(new Date(tv));renderResult(cur,curQ);
+    cur=calc(dt);renderResult(cur,curQ);
   });
   document.getElementById('btnSave').addEventListener('click',()=>{
     if(!cur)return;const g=cur.mainGua;
@@ -437,7 +451,19 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('modalClose').addEventListener('click',()=>document.getElementById('modalOverlay').style.display='none');
   document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')document.getElementById('modalOverlay').style.display='none';});
 });
-function setNow(){const n=new Date(),l=new Date(n.getTime()-n.getTimezoneOffset()*60000);document.getElementById('divTime').value=l.toISOString().slice(0,16);}
+function setNow(){
+  const n=new Date();
+  const y=n.getFullYear(),mo=String(n.getMonth()+1).padStart(2,'0'),d=String(n.getDate()).padStart(2,'0');
+  document.getElementById('divDate').value=`${y}-${mo}-${d}`;
+  document.getElementById('divHour').value=String(n.getHours());
+  document.getElementById('divMin').value=String(Math.floor(n.getMinutes()/5)*5);
+}
+function initTimeSelects(){
+  const hSel=document.getElementById('divHour');
+  const mSel=document.getElementById('divMin');
+  for(let i=0;i<24;i++){const o=document.createElement('option');o.value=i;o.textContent=String(i).padStart(2,'0');hSel.appendChild(o);}
+  for(let i=0;i<60;i+=5){const o=document.createElement('option');o.value=i;o.textContent=String(i).padStart(2,'0');mSel.appendChild(o);}
+}
 if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 </script>
 </body>
